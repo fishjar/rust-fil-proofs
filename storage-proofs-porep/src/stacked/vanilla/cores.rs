@@ -179,20 +179,8 @@ fn core_groups(cores_per_unit: usize) -> Option<Vec<Mutex<Vec<CoreIndex>>>> {
     let group_size = cores_per_unit;
     // ----------------------------------------------------
 
-    // Added by long 20210313 -----------------------------
-    use std::env;
-    let cpugrp_start: usize = match match env::var("LO_P1_CPUGRP_START") {
-        Ok(v) => v,
-        Err(_) => String::from("0"),
-    }.parse() {
-        Ok(v) => v,
-        Err(_) => 0,
-    };
-    // ----------------------------------------------------
-
     let core_groups = (0..group_count)
         .rev()                              // Added by long 20210402
-        .filter(| i | *i >= cpugrp_start )  // Added by long 20210313
         .map(|i| {
             (0..group_size)
                 .map(|j| {
