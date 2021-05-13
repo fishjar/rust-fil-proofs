@@ -1,4 +1,3 @@
-#![feature(renamed_spin_loop)]
 #![deny(clippy::all, clippy::perf, clippy::correctness, rust_2018_idioms)]
 #![warn(clippy::unwrap_used)]
 #![cfg_attr(target_arch = "aarch64", feature(stdsimd))]
