@@ -3,10 +3,6 @@ use std::sync::{Mutex, MutexGuard};
 use anyhow::{format_err, Result};
 use hwloc::{Bitmap, ObjectType, Topology, TopologyObject, CPUBIND_THREAD};
 use lazy_static::lazy_static;
-<<<<<<< HEAD
-// use log::{debug, info, warn}; // Modified by long 20210401
-=======
->>>>>>> 4d2512ad53d89ff35bc1902493fc03035fb162c7
 use log::{debug, warn};
 use storage_proofs_core::settings::SETTINGS;
 
