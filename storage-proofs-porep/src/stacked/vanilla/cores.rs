@@ -9,7 +9,8 @@ use storage_proofs_core::settings::SETTINGS;
 type CoreGroup = Vec<CoreIndex>;
 lazy_static! {
     pub static ref TOPOLOGY: Mutex<Topology> = Mutex::new(Topology::new());
-    pub static ref CORE_GROUPS: Option<Vec<Mutex<CoreGroup>>> = {
+    // pub static ref CORE_GROUPS: Option<Vec<Mutex<CoreGroup>>> = {
+    pub static ref CORE_GROUPS: Vec<Mutex<CoreGroup>> = {
         let num_producers = &SETTINGS.multicore_sdr_producers;
         let cores_per_unit = num_producers + 1;
 
@@ -23,21 +24,31 @@ lazy_static! {
 pub struct CoreIndex(usize);
 
 pub fn checkout_core_group() -> Option<MutexGuard<'static, CoreGroup>> {
-    match &*CORE_GROUPS {
-        Some(groups) => {
-            for (i, group) in groups.iter().enumerate() {
-                match group.try_lock() {
-                    Ok(guard) => {
-                        debug!("checked out core group {}", i);
-                        return Some(guard);
-                    }
-                    Err(_) => debug!("core group {} locked, could not checkout", i),
-                }
+    // match &*CORE_GROUPS {
+    //     Some(groups) => {
+    //         for (i, group) in groups.iter().enumerate() {
+    //             match group.try_lock() {
+    //                 Ok(guard) => {
+    //                     debug!("checked out core group {}", i);
+    //                     return Some(guard);
+    //                 }
+    //                 Err(_) => debug!("core group {} locked, could not checkout", i),
+    //             }
+    //         }
+    //         None
+    //     }
+    //     None => None,
+    // }
+    for (i, group) in CORE_GROUPS.iter().enumerate() {
+        match group.try_lock() {
+            Ok(guard) => {
+                debug!("checked out core group {}", i);
+                return Some(guard);
             }
-            None
+            Err(_) => debug!("core group {} locked, could not checkout", i),
         }
-        None => None,
     }
+    None
 }
 
 #[cfg(not(target_os = "windows"))]
@@ -122,9 +133,12 @@ fn get_core_by_index(topo: &Topology, index: CoreIndex) -> Result<&TopologyObjec
     }
 }
 
-fn core_groups(cores_per_unit: usize) -> Option<Vec<Mutex<Vec<CoreIndex>>>> {
+// fn core_groups(cores_per_unit: usize) -> Option<Vec<Mutex<Vec<CoreIndex>>>> {
+fn core_groups(cores_per_unit: usize) -> Vec<Mutex<Vec<CoreIndex>>> {
     let topo = TOPOLOGY.lock().expect("poisoned lock");
-    let all_cores = topo.objects_with_type(&ObjectType::Core).unwrap();
+    let all_cores = topo
+        .objects_with_type(&ObjectType::Core)
+        .expect("objects_with_type failed");
     let core_count = all_cores.len();
     let group_count = core_count / cores_per_unit;
     let group_size = cores_per_unit;
@@ -142,12 +156,12 @@ fn core_groups(cores_per_unit: usize) -> Option<Vec<Mutex<Vec<CoreIndex>>>> {
         })
         .collect::<Vec<_>>();
 
-    Some(
-        core_groups
-            .iter()
-            .map(|group| Mutex::new(group.clone()))
-            .collect::<Vec<_>>(),
-    )
+    // Some(
+    core_groups
+        .iter()
+        .map(|group| Mutex::new(group.clone()))
+        .collect::<Vec<_>>()
+    // )
 }
 
 #[cfg(test)]
