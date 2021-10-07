@@ -1735,7 +1735,7 @@ fn create_seal_for_upgrade<R: Rng, Tree: 'static + MerkleTreeTrait<Hasher = Tree
     )?;
     ensure!(proofs_are_valid, "Partition proofs failed to verify");
 
-    let proof = generate_empty_sector_update_proof::<Tree>(
+    let proofs = generate_empty_sector_update_proof::<Tree>(
         config,
         comm_r,
         new_comm_r,
@@ -1747,7 +1747,7 @@ fn create_seal_for_upgrade<R: Rng, Tree: 'static + MerkleTreeTrait<Hasher = Tree
     )?;
     let valid = verify_empty_sector_update_proof::<Tree>(
         config,
-        &proof,
+        &proofs,
         comm_r,
         new_comm_r,
         new_comm_d,
